@@ -15,16 +15,6 @@ class ApiTableData(View):
     def post(self, request):
         assetgroup = AssetGroup.objects.get(name='test')
         assets = Asset.objects.filter(assetgroup=assetgroup)
-        assets_geojson = serialize(
-            'geojson',
-            assets,
-            geometry_field='geometry',
-            srid=4326,
-            fields=('name', 'cvar')
-        )
-
-        data = [
-            {'name': 'name1', 'latlon': '45/32', 'cvar': -34},
-            {'name': 'name2', 'latlon': '23/12', 'cvar': 20},
-        ]
-        return JsonResponse({'data': data})
+        assets_geojson = serialize('geojson', assets,
+            geometry_field='geometry', srid=4326, fields=('name', 'cvar'))
+        return HttpResponse(assets_geojson)

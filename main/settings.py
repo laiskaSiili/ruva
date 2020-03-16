@@ -112,11 +112,3 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
-
-# geodjango settings
-#GDAL_DATA = 'C:\\OSGeo4W64\\share\\gdal'
-#GDAL_LIBRARY_PATH = 'C:\\OSGeo4W64\\bin\\gdal300.dll'
-#GEOS_LIBRARY_PATH  = 'C:\\OSGeo4W64\\bin\\geos_c.dll'
-#PROJ_LIB = 'C:\\OSGeo4W64\\share\\proj'
-#PROJ_LIB = 'C:\\OSGeo4W64\\bin\\proj_5_2.dll'
-#GDAL_DRIVER_PATH = 'C:\\Program Files\\GDAL\\gdalplugins'
