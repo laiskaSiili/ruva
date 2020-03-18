@@ -1,31 +1,38 @@
 'use strict';
 
 console.log('table.js');
-var table;
 
-$(document).ready(function() {
-    initTable('table');
-});
-
-function initTable(tableId) {
-    table = $('#' + tableId).DataTable( {
-        ajax: {
-            url: tableDataApiEndpoint,
-            type: 'POST',
-            dataType: 'json',
-            dataSrc: 'features',
-            beforeSend: function (request) {
-                let csrftoken = $('[name=csrfmiddlewaretoken]').val();
-                request.setRequestHeader("X-CSRFToken", csrftoken);
+/**
+ * Configuration options:
+ * targetId: 'table'
+ * ajaxUrl: ''
+ * ajaxType: 'GET'
+ * ajaxDataSrc: 'data'
+ * ajaxBeforeSend: function() {}
+ * initComplete: function() {}
+ * columns: {}
+ */
+class DataTableWrapper {
+    constructor(conf) {
+        this.conf = conf;
+        this.table = $('#' + (conf['tableId'] || 'table')).DataTable({
+            ajax: {
+                url: conf['ajaxUrl'] || '',
+                type: conf['ajaxType'] || 'GET',
+                dataType: 'json',
+                dataSrc: conf['ajaxDataSrc'] || 'data',
+                beforeSend: conf['ajaxDataSource'] || function() {},
             },
-        },
-        initComplete: function(settings, geojson) {
-            map.updateLayerFromTable(geojson);
-        },
-        columns: [
-            { 'title': 'Name', 'data': 'properties.name' },
-            { 'title': 'Lat/Lon', 'data': 'geometry.coordinates' },
-            { 'title': 'CVaR', 'data': 'properties.cvar' },
-        ]
-    });
+            initComplete: conf['initComplete'] || function() {},
+            columns: conf['columns'] || {}
+        })
+    }
+
+    getRawData() {
+        return this.table.ajax.json();
+    }
+
+    getRawDataJson() {
+        return JSON.stringify(this.getRawData())
+    }
 }

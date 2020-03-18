@@ -9,10 +9,10 @@ from ruva.models import Asset, AssetGroup
 class HomeView(View):
     def get(self, request):
         ctx = {}
-        return render(request, 'ruva/map.html', ctx)
+        return render(request, 'ruva/home.html', ctx)
 
 class ApiTableData(View):
-    def post(self, request):
+    def get(self, request):
         assetgroup = AssetGroup.objects.get(name='test')
         assets = Asset.objects.filter(assetgroup=assetgroup)
         assets_geojson = serialize('geojson', assets,

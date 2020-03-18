@@ -2,26 +2,24 @@
 
 console.log('map.js');
 
-var map;
-
-$(document).ready(function() {
-    map = new OLMap({
-        'targetId': 'map',
-        'initCenter': [0, 0],
-        'initZoom': 4
-    })
-});
-
-
-class OLMap {
+/**
+ * Configuration options:
+ * targetId: 'map'
+ * initZoom: 4
+ * initCenter: [0, 0]
+ *
+ */
+class OLMapWrapper {
     constructor(conf) {
         this.conf = conf;
+        // init layers
         this.osmLayer = this.initOsmLayer();
-        this.vectorLayer = this.initVectorLayer();
+        this.assetLayer = this.initVectorLayer();
+        // init map
         this.map = new ol.Map({
             target: conf['targetId'],
             layers: [
-                this.vectorLayer,
+                this.assetLayer,
                 this.osmLayer,
             ],
             view: this.initView(),
@@ -60,14 +58,8 @@ class OLMap {
         });
     }
 
-    updateLayerFromTable(geojson) {
-        this.vectorLayer.getSource().addFeatures((new ol.format.GeoJSON()).readFeatures(geojson, {featureProjection: 'EPSG:3857'}));
+    updateLayerFromGeoJson(geojson) {
+        this.assetLayer.getSource().addFeatures((new ol.format.GeoJSON()).readFeatures(geojson, {featureProjection: 'EPSG:3857'}));
     }
 
 }
-
-  /*
-var vectorLayerJSON = new ol.source.Vector({
-    features: (new ol.format.GeoJSON()).readFeatures(table.ajax.json())
-});
-*/
