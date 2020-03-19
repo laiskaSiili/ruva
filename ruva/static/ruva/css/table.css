@@ -1,0 +1,4 @@
+tr.highlighted-row {
+    font-weight: bold;
+    background-color: lightblue !important;
+}

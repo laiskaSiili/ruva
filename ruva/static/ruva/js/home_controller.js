@@ -24,9 +24,21 @@ $(document).ready(function() {
             { 'title': 'CVaR', 'data': 'properties.cvar' },
         ],
     });
+
+    table.tableEl.on( 'click', 'tbody tr',  onTableRowClick);
 });
 
 function onTableInitComplete() {
     // Update vector layer from table data
     map.updateLayerFromGeoJson(table.getRawDataJson());
+}
+
+function onTableRowClick(e) {
+    // Highlight clicked row
+    $('tr').removeClass('highlighted-row');
+    let rowElement = $(e.currentTarget);
+    rowElement.addClass('highlighted-row');
+    // Highlight map feature
+    let rowData = table.getRowDataFromElement(rowElement);
+    map.highlightAssetFeatures('pk', rowData.properties.pk);
 }

@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="{% static 'ruva/css/map.css' %}">
 <!-- Datatables -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="{% static 'ruva/css/table.css' %}">
 {% endblock %}
 
 
@@ -29,6 +30,7 @@
 
 {% block content %}
 <div id="map" class="map"></div>
-<table id="table"></table>
+<br>
+<table id="table" class="hover"></table>
 
 {% endblock %}

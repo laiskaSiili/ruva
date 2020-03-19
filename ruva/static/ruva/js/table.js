@@ -15,7 +15,8 @@ console.log('table.js');
 class DataTableWrapper {
     constructor(conf) {
         this.conf = conf;
-        this.table = $('#' + (conf['tableId'] || 'table')).DataTable({
+        this.tableEl = $('#' + (conf['tableId'] || 'table'));
+        this.table = this.tableEl.DataTable({
             ajax: {
                 url: conf['ajaxUrl'] || '',
                 type: conf['ajaxType'] || 'GET',
@@ -26,6 +27,11 @@ class DataTableWrapper {
             initComplete: conf['initComplete'] || function() {},
             columns: conf['columns'] || {}
         })
+
+        this.table.on('search.dt', function () {
+            console.log(this.table.rows({search:'applied'}).nodes())
+        }.bind(this));
+
     }
 
     getRawData() {
@@ -34,5 +40,9 @@ class DataTableWrapper {
 
     getRawDataJson() {
         return JSON.stringify(this.getRawData())
+    }
+
+    getRowDataFromElement(rowEl) {
+        return this.table.row(rowEl).data();
     }
 }
