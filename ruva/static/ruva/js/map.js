@@ -130,7 +130,7 @@ class OLMapWrapper {
         }
         this.map.getView().fit(
             extent,
-            {duration: 500, maxZoom: 10}
+            {duration: 500, maxZoom: 10, padding: [20, 20, 20, 20]}
         );
     }
 
