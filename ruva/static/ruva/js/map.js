@@ -16,24 +16,23 @@ class OLMapWrapper {
         this.initStyles();
         // Initialize layers and map
         this.initLayers();
+        // Initialize View
+        this.initView();
         this.map = new ol.Map({
             target: conf['targetId'],
             layers: [
                 this.assetLayer,
                 this.osmLayer,
             ],
-            view: this.initView(),
+            view: this.view,
         });
-        // Interactions
-        var selectAssetInteraction = new ol.interaction.Select({
+        // add highlight interaction
+        this.selectAssetInteraction = new ol.interaction.Select({
             condition: ol.events.condition.click,
             layers: [this.assetLayer],
             style: this.highlightedAssetStyle
           });
-        this.map.addInteraction(selectAssetInteraction);
-        selectAssetInteraction.on('select', function(e) {
-            console.log(e.selected[0])
-        });
+        this.map.addInteraction(this.selectAssetInteraction);
     }
 
     initStyles() {
@@ -56,7 +55,7 @@ class OLMapWrapper {
     }
 
     initView() {
-        return new ol.View({
+        this.view = new ol.View({
             center: ol.proj.fromLonLat(this.conf['initCenter'] || [0, 0]),
             zoom: this.conf['initZoom'] || 4,
             projection: 'EPSG:3857',
@@ -79,17 +78,60 @@ class OLMapWrapper {
 
     updateLayerFromGeoJson(geojson) {
         this.assetLayer.getSource().addFeatures((new ol.format.GeoJSON()).readFeatures(geojson, {featureProjection: 'EPSG:3857'}));
+        this.zoomToAllFeatures();
     }
 
-    highlightAssetFeatures(attrName, attrValue) {
-        let features = this.assetLayer.getSource().getFeatures();
-        for (const feature of features) {
+    getFeaturesByAttribute(attrName, attrValue) {
+        let allFeatures = this.assetLayer.getSource().getFeatures();
+        let selectedFeatures = [];
+        for (const feature of allFeatures) {
             if (feature.get(attrName) == attrValue) {
-                feature.setStyle(this.highlightedAssetStyle);
-            } else {
-                feature.setStyle(this.assetStyle);
+                selectedFeatures.push(feature);
             }
         }
+        return selectedFeatures
+    }
+
+    highlightAssetFeatures(features) {
+        let allFeatures = this.assetLayer.getSource().getFeatures();
+        for (const feature of allFeatures) {
+            feature.setStyle(this.assetStyle);
+        }
+        for (const feature of features) {
+            feature.setStyle(this.highlightedAssetStyle);
+        }
+    }
+
+    onFeatureClick(featureCallback, backgroundCallback) {
+        this.map.on('click', function(e) {
+            let feature = this.map.forEachFeatureAtPixel(e.pixel, function(feature) { return feature; });
+            if (feature) {
+                let isAssetFeature = this.assetLayer.getSource().hasFeature(feature);
+                if (isAssetFeature) {
+                    featureCallback(e, feature);
+                    return;
+                }
+            }
+            backgroundCallback(e);
+        }.bind(this));
+    }
+
+    zoomToAllFeatures() {
+        this.map.getView().fit(
+            this.assetLayer.getSource().getExtent(),
+            {duration: 500, padding: [20, 20, 20, 20]}
+        );
+    }
+
+    zoomToFeatures(features) {
+        let extent = features[0].getGeometry().getExtent();
+        for (const feature of features) {
+            ol.extent.extend(extent, feature.getGeometry().getExtent());
+        }
+        this.map.getView().fit(
+            extent,
+            {duration: 500, maxZoom: 10}
+        );
     }
 
 }

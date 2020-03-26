@@ -25,7 +25,9 @@ $(document).ready(function() {
         ],
     });
 
-    table.tableEl.on( 'click', 'tbody tr',  onTableRowClick);
+    table.onRowClick(onTableRowClick);
+    table.onRowDblClick(onTableRowDblClick);
+    map.onFeatureClick(onFeatureClick, onBackgroundClick);
 });
 
 function onTableInitComplete() {
@@ -34,11 +36,39 @@ function onTableInitComplete() {
 }
 
 function onTableRowClick(e) {
-    // Highlight clicked row
-    $('tr').removeClass('highlighted-row');
     let rowElement = $(e.currentTarget);
-    rowElement.addClass('highlighted-row');
-    // Highlight map feature
     let rowData = table.getRowDataFromElement(rowElement);
-    map.highlightAssetFeatures('pk', rowData.properties.pk);
+    let id = rowData.properties.pk
+    highlightById(id);
+}
+
+function onTableRowDblClick(e) {
+    let rowElement = $(e.currentTarget);
+    let rowData = table.getRowDataFromElement(rowElement);
+    let id = rowData.properties.pk
+    map.zoomToFeatures(map.getFeaturesByAttribute('pk', id));
+}
+
+function onFeatureClick(e, feature) {
+    console.log('onFeatureClick')
+    let id = feature.get('pk');
+    highlightById(id);
+    map.zoomToFeatures([feature]);
+}
+
+function onBackgroundClick(e) {
+    console.log('onBackgroundClick')
+    removeHighlight();
+    map.zoomToAllFeatures();
+}
+
+function highlightById(id) {
+    table.highlightRows(table.getRowsByAttribute('properties.pk', id));
+    map.highlightAssetFeatures(map.getFeaturesByAttribute('pk', id));
+}
+
+function removeHighlight() {
+    // Highlight row with a certainly non-existing pk of -1,
+    // effectively unselecting all features.
+    highlightById(-1);
 }

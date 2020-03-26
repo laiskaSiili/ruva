@@ -29,7 +29,7 @@ class DataTableWrapper {
         })
 
         this.table.on('search.dt', function () {
-            console.log(this.table.rows({search:'applied'}).nodes())
+            //console.log(this.table.rows({search:'applied'}).nodes())
         }.bind(this));
 
     }
@@ -45,4 +45,35 @@ class DataTableWrapper {
     getRowDataFromElement(rowEl) {
         return this.table.row(rowEl).data();
     }
+
+    getRowsByAttribute(attrName, attrValue) {
+        let rowData, rowDataValue;
+        let selectedRows = [];
+        this.table.rows().every( function () {
+            rowData = this.data();
+            rowDataValue = attrName.split('.').reduce(function(obj, i) { return obj[i]; }, rowData);
+            if (rowDataValue == attrValue) {
+                selectedRows.push(this);
+            }
+        });
+        return selectedRows;
+    }
+
+    highlightRows(rows) {
+        this.table.rows().every( function () {
+            $(this.node()).removeClass('highlighted-row');
+        });
+        for (const row of rows) {
+            $(row.node()).addClass('highlighted-row');
+        }
+    }
+
+    onRowClick(callback) {
+        this.tableEl.on('click', 'tbody tr',  callback);
+    }
+
+    onRowDblClick(callback) {
+        this.tableEl.on('dblclick', 'tbody tr', callback);
+    }
+
 }
