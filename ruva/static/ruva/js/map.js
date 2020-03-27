@@ -18,6 +18,9 @@ class OLMapWrapper {
         this.initLayers();
         // Initialize View
         this.initView();
+        // Initialize Controls
+        this.initResetZoomControl();
+        // Initialized Map
         this.map = new ol.Map({
             target: conf['targetId'],
             layers: [
@@ -25,14 +28,34 @@ class OLMapWrapper {
                 this.osmLayer,
             ],
             view: this.view,
+            controls: ol.control.defaults().extend([this.resetZoomControl])
         });
+
         // add highlight interaction
-        this.selectAssetInteraction = new ol.interaction.Select({
-            condition: ol.events.condition.click,
-            layers: [this.assetLayer],
-            style: this.highlightedAssetStyle
-          });
-        this.map.addInteraction(this.selectAssetInteraction);
+        // this.selectAssetInteraction = new ol.interaction.Select({
+        //     condition: ol.events.condition.click,
+        //     layers: [this.assetLayer],
+        //     style: this.highlightedAssetStyle
+        //   });
+        // this.map.addInteraction(this.selectAssetInteraction);
+    }
+
+    initResetZoomControl() {
+        let container = $('<div></div>')
+        container.addClass('ol-control ol-unselectable')
+        container.css({
+            'top': '70px',
+            'left': '.5em',
+        });
+        let button = $('<button type="button" title="Reset zoom"><i class="material-icons">zoom_out_map</i></button>');
+        button.attr('id', 'reset-zoom-control')
+        button.appendTo(container);
+
+        this.resetZoomControl = new ol.control.Control({
+            element: container.get(0)
+        });
+
+        button.on('click', this.zoomToAllFeatures.bind(this));
     }
 
     initStyles() {
@@ -103,18 +126,28 @@ class OLMapWrapper {
     }
 
     onFeatureClick(featureCallback, backgroundCallback) {
-        this.map.on('click', function(e) {
-            let feature = this.map.forEachFeatureAtPixel(e.pixel, function(feature) { return feature; });
-            if (feature) {
-                let isAssetFeature = this.assetLayer.getSource().hasFeature(feature);
-                if (isAssetFeature) {
-                    featureCallback(e, feature);
-                    return;
-                }
-            }
-            backgroundCallback(e);
+        this.map.on('singleclick', function(e) {
+            this._featureClickHandling(e, featureCallback, backgroundCallback)
         }.bind(this));
     }
+
+    onFeatureDblClick(featureCallback, backgroundCallback) {
+        this.map.on('dblclick', function(e) {
+            this._featureClickHandling(e, featureCallback, backgroundCallback)
+        }.bind(this));
+    }
+
+    _featureClickHandling(e, featureCallback, backgroundCallback) {
+        let feature = this.map.forEachFeatureAtPixel(e.pixel, function(feature) { return feature; });
+        if (feature) {
+            let isAssetFeature = this.assetLayer.getSource().hasFeature(feature);
+            if (isAssetFeature) {
+                featureCallback(e, feature);
+                return;
+            }
+        }
+        backgroundCallback(e);
+    };
 
     zoomToAllFeatures() {
         this.map.getView().fit(

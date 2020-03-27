@@ -3,6 +3,8 @@
 
 
 {% block css %}
+<!-- Materialize CSS -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <!-- Openlayers -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.2.1/css/ol.css" type="text/css">
 <link rel="stylesheet" href="{% static 'ruva/css/map.css' %}">
@@ -31,6 +33,6 @@
 {% block content %}
 <div id="map" class="map"></div>
 <br>
-<table id="table" class="hover"></table>
+<table id="table" class="w-100 hover"></table>
 
 {% endblock %}

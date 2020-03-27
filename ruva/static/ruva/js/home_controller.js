@@ -19,15 +19,19 @@ $(document).ready(function() {
         'ajaxDataSrc': 'features',
         'initComplete': onTableInitComplete,
         'columns': [
-            { 'title': 'Name', 'data': 'properties.name' },
+            { 'title': 'Name', 'data': 'properties.name', render(data, type, row, meta) {
+                return `<div class="d-flex align-items-center"><i class="zoom-to-asset mr-1 material-icons">zoom_in</i><span>${data}</span></div>`
+            }},
             { 'title': 'Lat/Lon', 'data': 'geometry.coordinates' },
             { 'title': 'CVaR', 'data': 'properties.cvar' },
         ],
     });
 
     table.onRowClick(onTableRowClick);
-    table.onRowDblClick(onTableRowDblClick);
     map.onFeatureClick(onFeatureClick, onBackgroundClick);
+    map.onFeatureDblClick(onFeatureDblClick, onBackgroundClick);
+
+    $(table.tableEl).on('click', '.zoom-to-asset', onClickZoomToAsset);
 });
 
 function onTableInitComplete() {
@@ -36,39 +40,48 @@ function onTableInitComplete() {
 }
 
 function onTableRowClick(e) {
+    //console.log('onTableRowClick');
     let rowElement = $(e.currentTarget);
     let rowData = table.getRowDataFromElement(rowElement);
     let id = rowData.properties.pk
     highlightById(id);
-}
-
-function onTableRowDblClick(e) {
-    let rowElement = $(e.currentTarget);
-    let rowData = table.getRowDataFromElement(rowElement);
-    let id = rowData.properties.pk
-    map.zoomToFeatures(map.getFeaturesByAttribute('pk', id));
 }
 
 function onFeatureClick(e, feature) {
-    console.log('onFeatureClick')
+    //console.log('onFeatureClick');
+    e.stopPropagation();
     let id = feature.get('pk');
     highlightById(id);
+}
+
+function onFeatureDblClick(e, feature) {
+    console.log('onFeatureDblClick');
+    e.stopPropagation();
+    onFeatureClick(e, feature);
     map.zoomToFeatures([feature]);
 }
 
 function onBackgroundClick(e) {
-    console.log('onBackgroundClick')
+    //console.log('onBackgroundClick')
     removeHighlight();
-    map.zoomToAllFeatures();
 }
 
 function highlightById(id) {
+    //console.log(`highlightById(${id})`);
     table.highlightRows(table.getRowsByAttribute('properties.pk', id));
     map.highlightAssetFeatures(map.getFeaturesByAttribute('pk', id));
 }
 
 function removeHighlight() {
+    //console.log('removeHighlight');
     // Highlight row with a certainly non-existing pk of -1,
     // effectively unselecting all features.
     highlightById(-1);
+}
+
+function onClickZoomToAsset(e) {
+    let rowEl = $(e.target).closest('tr');
+    let rowData = table.getRowDataFromElement(rowEl);
+    let id = rowData.properties.pk;
+    map.zoomToFeatures(map.getFeaturesByAttribute('pk', id));
 }

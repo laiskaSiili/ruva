@@ -2,3 +2,7 @@
     font-weight: bold;
     background-color: lightblue !important;
 }
+
+.zoom-to-asset {
+    cursor: pointer;
+}
