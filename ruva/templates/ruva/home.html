@@ -11,6 +11,8 @@
 <!-- Datatables -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="{% static 'ruva/css/table.css' %}">
+<!-- Home css -->
+<link rel="stylesheet" href="{% static 'ruva/css/home.css' %}">
 {% endblock %}
 
 
@@ -27,11 +29,19 @@
 <script src="{% static 'ruva/js/table.js'%}"></script>
 <!-- Home js -->
 <script src="{% static 'ruva/js/home_controller.js'%}"></script>
+<!-- Excel Js -->
+<script lang="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.15.2/xlsx.full.min.js"></script>
+<script src="{% static 'ruva/js/excel_reader.js'%}"></script>
 {% endblock %}
 
 
 {% block content %}
-<div id="map" class="map"></div>
+
+<div id="map-container">
+    <div id="map" class="map"></div>
+    <label id="file-upload-label" for="file-upload"></label>
+</div>
+<input id="file-upload" type="file"/>
 <br>
 <table id="table" class="w-100 hover"></table>
 
