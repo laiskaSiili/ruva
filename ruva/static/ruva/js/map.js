@@ -125,6 +125,16 @@ class OLMapWrapper {
         }
     }
 
+    toggleVisibilityOfAssetFeatures(features, hidden) {
+        for (const feature of features) {
+            if (hidden) {
+                feature.setStyle(new ol.style.Style({}));
+            } else {
+                feature.setStyle(this.assetStyle);
+            }
+        }
+    }
+
     onFeatureClick(featureCallback, backgroundCallback) {
         this.map.on('singleclick', function(e) {
             this._featureClickHandling(e, featureCallback, backgroundCallback)

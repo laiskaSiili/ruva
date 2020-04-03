@@ -28,6 +28,7 @@ $(document).ready(function() {
     });
 
     table.onRowClick(onTableRowClick);
+    table.onSearchInputChange(onTableSearchInputChange);
     map.onFeatureClick(onFeatureClick, onBackgroundClick);
     map.onFeatureDblClick(onFeatureDblClick, onBackgroundClick);
 
@@ -84,4 +85,10 @@ function onClickZoomToAsset(e) {
     let rowData = table.getRowDataFromElement(rowEl);
     let id = rowData.properties.pk;
     map.zoomToFeatures(map.getFeaturesByAttribute('pk', id));
+}
+
+function onTableSearchInputChange(e) {
+    let visibleRows = table.getRowsElementsWithSearchApplied();
+
+
 }

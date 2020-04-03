@@ -28,10 +28,6 @@ class DataTableWrapper {
             columns: conf['columns'] || {}
         })
 
-        this.table.on('search.dt', function () {
-            //console.log(this.table.rows({search:'applied'}).nodes())
-        }.bind(this));
-
     }
 
     getRawData() {
@@ -44,6 +40,14 @@ class DataTableWrapper {
 
     getRowDataFromElement(rowEl) {
         return this.table.row(rowEl).data();
+    }
+
+    getRowDataFromElements(rowEls) {
+        let rowsData = []
+        for (const rowEl of rowEls) {
+            rowsData.push(this.getRowDataFromElement(rowEl));
+        }
+        return rowsData;
     }
 
     getRowsByAttribute(attrName, attrValue) {
@@ -74,6 +78,14 @@ class DataTableWrapper {
 
     onRowDblClick(callback) {
         this.tableEl.on('dblclick', 'tbody tr', callback);
+    }
+
+    onSearchInputChange(callback) {
+        this.table.on('search.dt', callback);
+    }
+
+    getRowsElementsWithSearchApplied() {
+        return this.table.rows({search:'applied'}).nodes();
     }
 
 }
