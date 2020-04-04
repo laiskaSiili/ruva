@@ -125,27 +125,21 @@ class FileUploader {
             inputColumns.push(inputColumn);
         }
         var inputColum, selected;
-        var k= 0;
         for (const outputColumn in this.outputColumns) {
             // Add select input for column mapping
-            $(`<span><small class="text-muted">${outputColumn}</small></span>`).appendTo(this.columnMappingContainer);
+            $(`<span><small>${outputColumn}</small></span>`).appendTo(this.columnMappingContainer);
             var columnSelect = $(`<select data-output-column="${outputColumn}" class="mapping-column-select form-control"></select>`).appendTo(this.columnMappingContainer);
+            $(`<option value="initial" style="display:none"></option>`).appendTo(columnSelect);
             for (let i=0; i<inputColumns.length; i++) {
                 inputColum = inputColumns[i];
-                selected = i===k ? 'selected' : '';
                 $(`<option value="${inputColum}" ${selected}>${inputColum}</option>`).appendTo(columnSelect);
             }
             // validation message
-            $(`<small class="d-block"></small>`).appendTo(this.columnMappingContainer);
+            $(`<small class="d-block text-muted">Select column...</small>`).appendTo(this.columnMappingContainer);
             // Add eventlistener for change on mapping select
             columnSelect.on('change', function(e) {
                 this.cleanColumn(e.target);
             }.bind(this));
-            // trigger initial change event
-            const e = new Event("change");
-            columnSelect.get(0).dispatchEvent(e);
-            // increase index
-            k++;
         }
 
 
@@ -165,10 +159,10 @@ class FileUploader {
         try {
             var cleandedColumnArray = validateFunc(columnArray);
             selectElement.next().addClass('text-success');
-            selectElement.next().removeClass('text-danger');
+            selectElement.next().removeClass('text-danger text-muted');
             selectElement.next().html('Values all valid!');
         } catch(err) {
-            selectElement.next().removeClass('text-success');
+            selectElement.next().removeClass('text-success text-muted');
             selectElement.next().addClass('text-danger');
             selectElement.next().html(err);
             throw err;
