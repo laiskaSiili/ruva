@@ -3,6 +3,9 @@ class FileUploader {
         this.modal = $('#' + modalId);
         this.workbook = null;
         this.dataJson = null;
+        this.onFileUploadSuccess = function(dataJson) {
+            console.log(dataJson);
+        }
 
         this.outputColumns = {
             'name': cleanStrings,
@@ -17,6 +20,11 @@ class FileUploader {
 
         this.sheetSelectionContainer = this.modal.find('.sheet-selection-container');
         this.columnMappingContainer = this.modal.find('.column-mapping-container');
+
+        // Event listeners
+        this.modal.find('.import-file-button').on('click', this.processFile.bind(this));
+
+        // Functions
 
         function cleanStrings(columnArray) {
             var cleanedColumnArray = [];
@@ -116,6 +124,7 @@ class FileUploader {
     }
 
     setupColumnMappingDropdowns(e) {
+        this.modal.find('.import-file-button').prop('disabled', true);
         this.columnMappingContainer.empty();
 
         var sheet = e.target.value;
@@ -158,21 +167,36 @@ class FileUploader {
         let err = null;
         try {
             var cleandedColumnArray = validateFunc(columnArray);
+            selectElement.addClass('valid');
             selectElement.next().addClass('text-success');
             selectElement.next().removeClass('text-danger text-muted');
             selectElement.next().html('Values all valid!');
         } catch(err) {
+            selectElement.removeClass('valid');
             selectElement.next().removeClass('text-success text-muted');
             selectElement.next().addClass('text-danger');
             selectElement.next().html(err);
-            throw err;
+        } finally {
+            var importButton = this.modal.find('.import-file-button');
+            if (this.allColumnsValid()) {
+                importButton.prop('disabled', false);
+            } else {
+                importButton.prop('disabled', true);
+            }
         }
         return cleandedColumnArray;
     }
 
+    processFile() {
+        this.allColumnsValid();
+    }
 
-    mapColumns() {
-
+    allColumnsValid() {
+        var allColumnSelectElements = this.columnMappingContainer.children('select').get();
+        var allValid = allColumnSelectElements.every(function(el) {
+            return el.classList.contains('valid');
+        });
+        return allValid;
     }
 
 }

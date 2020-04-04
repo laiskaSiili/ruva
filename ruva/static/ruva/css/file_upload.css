@@ -26,3 +26,6 @@
     cursor: pointer;
 }
 
+.import-file-button:disabled {
+    cursor: not-allowed;
+}
