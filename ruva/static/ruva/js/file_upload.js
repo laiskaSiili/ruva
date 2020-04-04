@@ -125,13 +125,14 @@ class FileUploader {
             inputColumns.push(inputColumn);
         }
         var inputColum, selected;
+        var k= 0;
         for (const outputColumn in this.outputColumns) {
             // Add select input for column mapping
             $(`<span><small class="text-muted">${outputColumn}</small></span>`).appendTo(this.columnMappingContainer);
             var columnSelect = $(`<select data-output-column="${outputColumn}" class="mapping-column-select form-control"></select>`).appendTo(this.columnMappingContainer);
             for (let i=0; i<inputColumns.length; i++) {
                 inputColum = inputColumns[i];
-                selected = i===0 ? 'selected' : '';
+                selected = i===k ? 'selected' : '';
                 $(`<option value="${inputColum}" ${selected}>${inputColum}</option>`).appendTo(columnSelect);
             }
             // validation message
@@ -143,6 +144,8 @@ class FileUploader {
             // trigger initial change event
             const e = new Event("change");
             columnSelect.get(0).dispatchEvent(e);
+            // increase index
+            k++;
         }
 
 
