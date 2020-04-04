@@ -8,8 +8,8 @@ class FileUploader {
         this.outputColumns = {
             'name': cleanStrings,
             'cvar': cleanNumbers,
-            'latitude': cleanNumbers,
-            'longitude': cleanNumbers
+            'latitude': cleanLatitude,
+            'longitude': cleanLongitude
         }
 
         this.outputTransformer = function(mappedDataJson) {
@@ -37,7 +37,7 @@ class FileUploader {
             for (var i=0; i<mappedDataJson.length; i++) {
                 mappedRow = mappedDataJson[i];
                 feature = JSON.parse(JSON.stringify(featureTemplate)); // Deep copy feature template
-                feature.geometry.coordinates.push([mappedRow.latitude, mappedRow.longitude])
+                feature.geometry.coordinates = [mappedRow.longitude, mappedRow.latitude];
                 feature.properties = {
                     'pk': i,
                     'name': mappedRow.name,
@@ -54,13 +54,13 @@ class FileUploader {
         // Event listeners
         this.modal.find('.import-file-button').on('click', this.importFile.bind(this));
 
-        // Functions
+        // Cleaning functions
         function cleanStrings(columnArray) {
             var cleanedColumnArray = [];
             var v;
             for (var i=0; i<columnArray.length; i++) {
                 v = columnArray[i];
-                if (v === undefined || v == '') {
+                if (v === undefined || v === '') {
                     throw `Empty value found around row ${i+2}!` // i is 0-based and starts after header
                 }
                 try {
@@ -78,7 +78,7 @@ class FileUploader {
             var v;
             for (var i=0; i<columnArray.length; i++) {
                 v = columnArray[i];
-                if (v === undefined || v == '') {
+                if (v === undefined || v === '') {
                     throw `Empty value found around row ${i+2}!` // i is 0-based and starts after header
                 }
                 try {
@@ -92,6 +92,26 @@ class FileUploader {
                 cleanedColumnArray.push(v);
             }
             return cleanedColumnArray;
+        }
+
+        function cleanLatitude(columnArray) {
+            columnArray = cleanNumbers(columnArray);
+            for (var i=0; i<columnArray.length; i++) {
+                if (columnArray[i] < -90 || columnArray[i] > 90) {
+                    throw `Latitude value around row ${i+2} must be within interval [-90, 90]: ${columnArray[i]}`;
+                }
+            }
+            return columnArray;
+        }
+
+        function cleanLongitude(columnArray) {
+            columnArray = cleanNumbers(columnArray);
+            for (var i=0; i<columnArray.length; i++) {
+                if (columnArray[i] < -180 || columnArray[i] > 180) {
+                    throw `Longitude value around row ${i+2} must be within interval [-180, 180]: ${columnArray[i]}`;
+                }
+            }
+            return columnArray;
         }
 
     }
@@ -129,7 +149,6 @@ class FileUploader {
 
     openImportDialog() {
         this.setupSheetSelectionDropdown();
-
         // show modal
         this.modal.modal();
     }

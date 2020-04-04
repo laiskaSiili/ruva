@@ -17,17 +17,22 @@ class DataTableWrapper {
         this.conf = conf;
         this.tableEl = $('#' + (conf['tableId'] || 'table'));
         this.table = this.tableEl.DataTable({
+            destroy: true,
             ajax: {
                 url: conf['ajaxUrl'] || '',
                 type: conf['ajaxType'] || 'GET',
                 dataType: 'json',
                 dataSrc: conf['ajaxDataSrc'] || 'data',
-                beforeSend: conf['ajaxDataSource'] || function() {},
+                beforeSend: conf['ajaxBeforeSend'] || function() {},
             },
             initComplete: conf['initComplete'] || function() {},
             columns: conf['columns'] || {}
         })
 
+    }
+
+    reloadData(callback) {
+        this.table.ajax.reload(callback);
     }
 
     getRawData() {

@@ -2,7 +2,7 @@
 
 console.log('controller.js')
 
-var map, table, fileUploader;
+var map, table, fileUploader, tableData;
 
 $(document).ready(function() {
     console.log('init');
@@ -40,7 +40,13 @@ $(document).ready(function() {
     fileUploader = new FileUploader('import-modal');
     fileUploader.setupDropzone('.file-upload-container label');
     fileUploader.setupFileInput('.file-upload-container input');
+    fileUploader.onFileUploadSuccess = onFileUploadSuccess;
+
 });
+
+function onFileUploadSuccess(dataJson) {
+    map.updateLayerFromGeoJson(JSON.stringify(dataJson));
+}
 
 function onTableInitComplete() {
     // Update vector layer from table data
