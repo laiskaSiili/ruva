@@ -2,17 +2,19 @@
 
 console.log('controller.js')
 
-var map, table;
+var map, table, fileUploader;
 
 $(document).ready(function() {
     console.log('init');
 
+    // Init map
     map = new OLMapWrapper({
         'targetId': 'map',
         'initCenter': [8, 47],
         'initZoom': 6
     })
 
+    // Init table
     table = new DataTableWrapper({
         'targetId': 'table',
         'ajaxUrl': tableDataApiEndpoint, // global variable defined in html script tag
@@ -22,7 +24,7 @@ $(document).ready(function() {
             { 'title': 'Name', 'data': 'properties.name', render(data, type, row, meta) {
                 return `<div class="d-flex align-items-center"><i class="zoom-to-asset mr-1 material-icons">zoom_in</i><span>${data}</span></div>`
             }},
-            { 'title': 'Lat/Lon', 'data': 'geometry.coordinates' },
+            //{ 'title': 'Lat/Lon', 'data': 'geometry.coordinates' },
             { 'title': 'CVaR', 'data': 'properties.cvar' },
         ],
     });
@@ -33,6 +35,11 @@ $(document).ready(function() {
     map.onFeatureDblClick(onFeatureDblClick, onBackgroundClick);
 
     $(table.tableEl).on('click', '.zoom-to-asset', onClickZoomToAsset);
+
+    // Init file uploader
+    fileUploader = new FileUploader('import-modal');
+    fileUploader.setupDropzone('.file-upload-container label');
+    fileUploader.setupFileInput('.file-upload-container input');
 });
 
 function onTableInitComplete() {
@@ -89,6 +96,4 @@ function onClickZoomToAsset(e) {
 
 function onTableSearchInputChange(e) {
     let visibleRows = table.getRowsElementsWithSearchApplied();
-
-
 }
