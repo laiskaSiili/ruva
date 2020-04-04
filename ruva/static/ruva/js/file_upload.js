@@ -3,9 +3,7 @@ class FileUploader {
         this.modal = $('#' + modalId);
         this.workbook = null;
         this.dataJson = null;
-        this.onFileUploadSuccess = function(dataJson) {
-            console.log(dataJson);
-        }
+        this.onFileUploadSuccess = null;
 
         this.outputColumns = {
             'name': cleanStrings,
@@ -14,18 +12,49 @@ class FileUploader {
             'longitude': cleanNumbers
         }
 
-        this.outputTransformer = function(cleanedOutput) {
+        this.outputTransformer = function(mappedDataJson) {
+            // Create GeoJson format
 
+            var transformedDataJson = {
+                "type": "FeatureCollection",
+                "crs": {
+                    "type": "name",
+                    "properties": {
+                        "name": "EPSG:4326"
+                    }},
+                "features": []
+            }
+            var featureTemplate =  {
+                "type": "Feature",
+                "properties": {},
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": []
+                }
+            }
+
+            var mappedRow, feature;
+            for (var i=0; i<mappedDataJson.length; i++) {
+                mappedRow = mappedDataJson[i];
+                feature = JSON.parse(JSON.stringify(featureTemplate)); // Deep copy feature template
+                feature.geometry.coordinates.push([mappedRow.latitude, mappedRow.longitude])
+                feature.properties = {
+                    'pk': i,
+                    'name': mappedRow.name,
+                    'cvar': mappedRow.cvar,
+                }
+                transformedDataJson.features.push(feature); // Append feature to geojson
+            }
+            return transformedDataJson;
         }
 
         this.sheetSelectionContainer = this.modal.find('.sheet-selection-container');
         this.columnMappingContainer = this.modal.find('.column-mapping-container');
 
         // Event listeners
-        this.modal.find('.import-file-button').on('click', this.processFile.bind(this));
+        this.modal.find('.import-file-button').on('click', this.importFile.bind(this));
 
         // Functions
-
         function cleanStrings(columnArray) {
             var cleanedColumnArray = [];
             var v;
@@ -157,14 +186,13 @@ class FileUploader {
     cleanColumn(selectElement) {
         var selectElement = $(selectElement);
         var inputColumn = selectElement.val();
-        var outputColumn = selectElement.data('output-column');;
+        var outputColumn = selectElement.data('output-column');
 
-        var validateFunc = this.outputColumns[outputColumn];
         var columnArray = this.dataJson.map(function(row) {
             return row[inputColumn];
         })
 
-        let err = null;
+        var validateFunc = this.outputColumns[outputColumn];
         try {
             var cleandedColumnArray = validateFunc(columnArray);
             selectElement.addClass('valid');
@@ -187,8 +215,32 @@ class FileUploader {
         return cleandedColumnArray;
     }
 
-    processFile() {
-        this.allColumnsValid();
+    importFile() {
+        // Create dataJson with selected columns
+        // 0) Hide modal
+        this.modal.modal('hide');
+
+        // 1) Create mapping
+        var columnMapping = {};
+        var allColumnSelectElements = this.columnMappingContainer.children('select');
+        allColumnSelectElements.each(function(index, selectElement) {
+            columnMapping[$(selectElement).data('output-column')] = $(selectElement).val(); // output column : input column
+        });
+
+        // 2) Create new dataJson
+        var mappedDataJson = [];
+        for (var i=0; i<this.dataJson.length; i++) {
+            mappedDataJson.push({});
+            for (const [outputColumn, inputColumn] of Object.entries(columnMapping)) {
+                mappedDataJson[i][outputColumn] = this.dataJson[i][inputColumn];
+              }
+        }
+
+        // 3) Apply data transformation
+        var transformedDataJson = this.outputTransformer(mappedDataJson);
+
+        // 4) Call import success callback with transformed Data
+        this.onFileUploadSuccess(transformedDataJson);
     }
 
     allColumnsValid() {
