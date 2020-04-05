@@ -52,9 +52,9 @@ $(document).ready(function() {
     File uploader
     --------*/
     fileUploader = new FileUploader({
-        modalId: 'import-modal',
-        onFileUploadSuccess: onFileUploadSuccess,
-        columnNameAndValidation: {
+        'modalId': 'import-modal',
+        'onFileUploadSuccess': onFileUploadSuccess,
+        'columnNameAndValidation': {
             'name': cleanStrings, // defined in misc.js
             'cvar': cleanNumbers, // defined in misc.js
             'latitude': cleanLatitude, // defined in misc.js
