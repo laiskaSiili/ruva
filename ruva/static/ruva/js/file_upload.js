@@ -1,119 +1,25 @@
+'use strict';
+console.log('file_upload.js');
+
+/**
+ * Configuration options:
+ * modalId: 'modal'
+ * onFileUploadSuccess: function() {}
+ * columnNameAndValidation: {}
+ */
 class FileUploader {
-    constructor(modalId) {
-        this.modal = $('#' + modalId);
+    constructor(conf) {
+        this.modal = $('#' + conf['modalId'] || 'modal');
+        this.onFileUploadSuccess = conf['onFileUploadSuccess'] || function() {};
+        this.columnNameAndValidation = conf['columnNameAndValidation'] || {};
+
         this.workbook = null;
         this.dataJson = null;
-        this.onFileUploadSuccess = null;
-
-        this.outputColumns = {
-            'name': cleanStrings,
-            'cvar': cleanNumbers,
-            'latitude': cleanLatitude,
-            'longitude': cleanLongitude
-        }
-
-        this.outputTransformer = function(mappedDataJson) {
-            // Create GeoJson format
-
-            var transformedDataJson = {
-                "type": "FeatureCollection",
-                "crs": {
-                    "type": "name",
-                    "properties": {
-                        "name": "EPSG:4326"
-                    }},
-                "features": []
-            }
-            var featureTemplate =  {
-                "type": "Feature",
-                "properties": {},
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": []
-                }
-            }
-
-            var mappedRow, feature;
-            for (var i=0; i<mappedDataJson.length; i++) {
-                mappedRow = mappedDataJson[i];
-                feature = JSON.parse(JSON.stringify(featureTemplate)); // Deep copy feature template
-                feature.geometry.coordinates = [mappedRow.longitude, mappedRow.latitude];
-                feature.properties = {
-                    'pk': i,
-                    'name': mappedRow.name,
-                    'cvar': mappedRow.cvar,
-                }
-                transformedDataJson.features.push(feature); // Append feature to geojson
-            }
-            return transformedDataJson;
-        }
-
         this.sheetSelectionContainer = this.modal.find('.sheet-selection-container');
         this.columnMappingContainer = this.modal.find('.column-mapping-container');
 
         // Event listeners
         this.modal.find('.import-file-button').on('click', this.importFile.bind(this));
-
-        // Cleaning functions
-        function cleanStrings(columnArray) {
-            var cleanedColumnArray = [];
-            var v;
-            for (var i=0; i<columnArray.length; i++) {
-                v = columnArray[i];
-                if (v === undefined || v === '') {
-                    throw `Empty value found around row ${i+2}!` // i is 0-based and starts after header
-                }
-                try {
-                    v = v.toString();
-                    cleanedColumnArray.push(v.trim());
-                } catch (err) {
-                    throw `Value around row ${i+2} cannot be converted to text: ${columnArray[i]}`;
-                }
-            }
-            return cleanedColumnArray;
-        }
-
-        function cleanNumbers(columnArray) {
-            var cleanedColumnArray = [];
-            var v;
-            for (var i=0; i<columnArray.length; i++) {
-                v = columnArray[i];
-                if (v === undefined || v === '') {
-                    throw `Empty value found around row ${i+2}!` // i is 0-based and starts after header
-                }
-                try {
-                    v = parseFloat(v);
-                } catch (err) {
-                    throw `Value around row ${i+2} cannot be converted to number: ${columnArray[i]}`;
-                }
-                if (isNaN(v)) {
-                    throw `Value around row ${i+2} cannot be converted to number: ${columnArray[i]}`;
-                }
-                cleanedColumnArray.push(v);
-            }
-            return cleanedColumnArray;
-        }
-
-        function cleanLatitude(columnArray) {
-            columnArray = cleanNumbers(columnArray);
-            for (var i=0; i<columnArray.length; i++) {
-                if (columnArray[i] < -90 || columnArray[i] > 90) {
-                    throw `Latitude value around row ${i+2} must be within interval [-90, 90]: ${columnArray[i]}`;
-                }
-            }
-            return columnArray;
-        }
-
-        function cleanLongitude(columnArray) {
-            columnArray = cleanNumbers(columnArray);
-            for (var i=0; i<columnArray.length; i++) {
-                if (columnArray[i] < -180 || columnArray[i] > 180) {
-                    throw `Longitude value around row ${i+2} must be within interval [-180, 180]: ${columnArray[i]}`;
-                }
-            }
-            return columnArray;
-        }
-
     }
 
     setupDropzone(dropzoneSelector) {
@@ -182,7 +88,7 @@ class FileUploader {
             inputColumns.push(inputColumn);
         }
         var inputColum, selected;
-        for (const outputColumn in this.outputColumns) {
+        for (const outputColumn in this.columnNameAndValidation) {
             // Add select input for column mapping
             $(`<span><small>${outputColumn}</small></span>`).appendTo(this.columnMappingContainer);
             var columnSelect = $(`<select data-output-column="${outputColumn}" class="mapping-column-select form-control"></select>`).appendTo(this.columnMappingContainer);
@@ -211,7 +117,7 @@ class FileUploader {
             return row[inputColumn];
         })
 
-        var validateFunc = this.outputColumns[outputColumn];
+        var validateFunc = this.columnNameAndValidation[outputColumn];
         try {
             var cleandedColumnArray = validateFunc(columnArray);
             selectElement.addClass('valid');
@@ -255,11 +161,8 @@ class FileUploader {
               }
         }
 
-        // 3) Apply data transformation
-        var transformedDataJson = this.outputTransformer(mappedDataJson);
-
-        // 4) Call import success callback with transformed Data
-        this.onFileUploadSuccess(transformedDataJson);
+        // 3) Call import success callback with transformed Data
+        this.onFileUploadSuccess(mappedDataJson);
     }
 
     allColumnsValid() {
@@ -271,43 +174,3 @@ class FileUploader {
     }
 
 }
-
-
-
-
-
-
-/*
- workbook.SheetNames.forEach(function(sheet) {
-    var dataJson = XLSX.utils.sheet_to_row_object_array(
-        workbook.Sheets[sheet]
-    );
-    //console.log(sheet)
-    //console.log(dataJson)
-    //console.log('------------------')
-
-    var geoJsonTemplate = {
-        "type": "FeatureCollection",
-        "crs": {
-            "type": "name",
-            "properties": {
-                "name": "EPSG:4326"
-            }},
-        "features": []
-    }
-    var featureTemplate =  {
-        "type": "Feature",
-        "properties": {
-            "name": "asset1",
-            "cvar": -20.0,
-            "pk": "4"
-        },
-        "geometry": {
-            "type": "Point",
-            "coordinates": [8.45947265625, 48.790283203125]
-        }
-    }
-
-
-    })
-    */

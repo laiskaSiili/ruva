@@ -1,5 +1,4 @@
 'use strict';
-
 console.log('map.js');
 
 /**
@@ -31,13 +30,6 @@ class OLMapWrapper {
             controls: ol.control.defaults().extend([this.resetZoomControl])
         });
 
-        // add highlight interaction
-        // this.selectAssetInteraction = new ol.interaction.Select({
-        //     condition: ol.events.condition.click,
-        //     layers: [this.assetLayer],
-        //     style: this.highlightedAssetStyle
-        //   });
-        // this.map.addInteraction(this.selectAssetInteraction);
     }
 
     initResetZoomControl() {
@@ -99,7 +91,10 @@ class OLMapWrapper {
         });
     }
 
-    updateLayerFromGeoJson(geojson) {
+    updateLayerFromGeoJson(geojson, replace=true) {
+        if (replace) {
+            this.assetLayer.getSource().clear();
+        }
         this.assetLayer.getSource().addFeatures((new ol.format.GeoJSON()).readFeatures(geojson, {featureProjection: 'EPSG:3857'}));
         this.zoomToAllFeatures();
     }
