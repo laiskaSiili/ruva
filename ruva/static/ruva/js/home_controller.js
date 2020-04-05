@@ -1,43 +1,79 @@
 'use strict';
-
 console.log('controller.js')
 
-var map, table;
+var dataManager, map, table, fileUploader, tableData;
 
 $(document).ready(function() {
     console.log('init');
 
+    /* -------
+    Init Data Manager
+    --------*/
+    dataManager = new DataManager();
+    dataManager.addDataGetter('getTableData', getTableData); // defined in misc.js
+    dataManager.addDataGetter('getMapData', getMapData); // defined in misc.js
+    dataManager.addDataSetter('setDataFromFileUpload', setDataFromFileUpload); // defined in misc.js
+    // Set endpoint for initial data sourcing via ajax
+    dataManager.updateAjaxParams({
+        'url': tableDataApiEndpoint, // global variable defined in html script tag
+        'success': initTableAndMapData
+    });
+    dataManager.updateDataFromRemote();
+
+    /* -------
+    Init map
+    --------*/
     map = new OLMapWrapper({
         'targetId': 'map',
         'initCenter': [8, 47],
         'initZoom': 6
     })
+    map.onFeatureClick(onFeatureClick, onBackgroundClick);
+    map.onFeatureDblClick(onFeatureDblClick, onBackgroundClick);
 
+    /* -------
+    Init table
+    --------*/
     table = new DataTableWrapper({
         'targetId': 'table',
-        'ajaxUrl': tableDataApiEndpoint, // global variable defined in html script tag
-        'ajaxDataSrc': 'features',
-        'initComplete': onTableInitComplete,
         'columns': [
             { 'title': 'Name', 'data': 'properties.name', render(data, type, row, meta) {
                 return `<div class="d-flex align-items-center"><i class="zoom-to-asset mr-1 material-icons">zoom_in</i><span>${data}</span></div>`
             }},
-            { 'title': 'Lat/Lon', 'data': 'geometry.coordinates' },
+            //{ 'title': 'Lat/Lon', 'data': 'geometry.coordinates' },
             { 'title': 'CVaR', 'data': 'properties.cvar' },
         ],
     });
-
     table.onRowClick(onTableRowClick);
     table.onSearchInputChange(onTableSearchInputChange);
-    map.onFeatureClick(onFeatureClick, onBackgroundClick);
-    map.onFeatureDblClick(onFeatureDblClick, onBackgroundClick);
-
     $(table.tableEl).on('click', '.zoom-to-asset', onClickZoomToAsset);
+
+    /* -------
+    File uploader
+    --------*/
+    fileUploader = new FileUploader({
+        'modalId': 'import-modal',
+        'onFileUploadSuccess': onFileUploadSuccess,
+        'columnNameAndValidation': {
+            'name': cleanStrings, // defined in misc.js
+            'cvar': cleanNumbers, // defined in misc.js
+            'latitude': cleanLatitude, // defined in misc.js
+            'longitude': cleanLongitude // defined in misc.js
+        }
+    });
+    fileUploader.setupDropzone('.file-upload-container label');
+    fileUploader.setupFileInput('.file-upload-container input');
 });
 
-function onTableInitComplete() {
-    // Update vector layer from table data
-    map.updateLayerFromGeoJson(table.getRawDataJson());
+function initTableAndMapData() {
+    console.log('initTableAndMapData');
+    table.replaceData(dataManager.getData('getTableData'));
+    map.updateLayerFromGeoJson(dataManager.getData('getMapData'));
+}
+
+function onFileUploadSuccess(dataJson) {
+    dataManager.setData('setDataFromFileUpload', dataJson);
+    initTableAndMapData();
 }
 
 function onTableRowClick(e) {
@@ -89,6 +125,4 @@ function onClickZoomToAsset(e) {
 
 function onTableSearchInputChange(e) {
     let visibleRows = table.getRowsElementsWithSearchApplied();
-
-
 }

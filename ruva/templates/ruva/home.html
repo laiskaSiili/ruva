@@ -11,8 +11,8 @@
 <!-- Datatables -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="{% static 'ruva/css/table.css' %}">
-<!-- Home css -->
-<link rel="stylesheet" href="{% static 'ruva/css/home.css' %}">
+<!-- File upload -->
+<link rel="stylesheet" href="{% static 'ruva/css/file_upload.css' %}">
 {% endblock %}
 
 
@@ -28,20 +28,31 @@
 <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
 <script src="{% static 'ruva/js/table.js'%}"></script>
 <!-- Home js -->
+<script src="{% static 'ruva/js/data_manager.js'%}"></script>
+<script src="{% static 'ruva/js/misc.js'%}"></script>
 <script src="{% static 'ruva/js/home_controller.js'%}"></script>
-<!-- Excel Js -->
+<!-- File upload -->
 <script lang="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.15.2/xlsx.full.min.js"></script>
-<script src="{% static 'ruva/js/excel_reader.js'%}"></script>
+<script src="{% static 'ruva/js/file_upload.js'%}"></script>
 {% endblock %}
 
 
 {% block content %}
+<!-- Import Dialog Modal -->
+{% include 'ruva/includes/upload_modal.html' with modal_id='import-modal' %}
 
 <div id="map-container">
     <div id="map" class="map"></div>
-    <label id="file-upload-label" for="file-upload"></label>
 </div>
-<input id="file-upload" type="file"/>
+
+
+<div class="file-upload-container d-flex justify-content-center align-items-center">
+    <label for="file-input" class="d-flex justify-content-center align-items-center">
+        <i class="material-icons">file_upload</i> Drop xlsx here or click to upload
+    </label>
+    <input type="file" id="file-input" onclick="this.value=null;"/>
+</div>
+
 <br>
 <table id="table" class="w-100 hover"></table>
 

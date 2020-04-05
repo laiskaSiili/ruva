@@ -1,0 +1,31 @@
+.file-upload-container {
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+.file-upload-container input {
+    width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.file-upload-container label {
+    margin: 0px;
+    width: 100%;
+    height: 100%;
+    border: 2px dashed #bbb;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    padding: 15px;
+    color: #bbb;
+    cursor: pointer;
+}
+
+.import-file-button:disabled {
+    cursor: not-allowed;
+}

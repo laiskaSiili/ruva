@@ -1,14 +1,9 @@
 'use strict';
-
 console.log('table.js');
 
 /**
  * Configuration options:
  * targetId: 'table'
- * ajaxUrl: ''
- * ajaxType: 'GET'
- * ajaxDataSrc: 'data'
- * ajaxBeforeSend: function() {}
  * initComplete: function() {}
  * columns: {}
  */
@@ -17,25 +12,20 @@ class DataTableWrapper {
         this.conf = conf;
         this.tableEl = $('#' + (conf['tableId'] || 'table'));
         this.table = this.tableEl.DataTable({
-            ajax: {
-                url: conf['ajaxUrl'] || '',
-                type: conf['ajaxType'] || 'GET',
-                dataType: 'json',
-                dataSrc: conf['ajaxDataSrc'] || 'data',
-                beforeSend: conf['ajaxDataSource'] || function() {},
-            },
+            destroy: true,
+            data: {},
             initComplete: conf['initComplete'] || function() {},
             columns: conf['columns'] || {}
         })
 
     }
 
-    getRawData() {
-        return this.table.ajax.json();
+    replaceData(data) {
+        this.table.clear().rows.add(data).draw();
     }
 
-    getRawDataJson() {
-        return JSON.stringify(this.getRawData())
+    getData() {
+        return this.table.rows().data();
     }
 
     getRowDataFromElement(rowEl) {
