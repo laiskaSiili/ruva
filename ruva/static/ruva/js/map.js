@@ -24,6 +24,7 @@ class OLMapWrapper {
             target: conf['targetId'],
             layers: [
                 this.assetLayer,
+                this.wmsLayer1,
                 this.osmLayer,
             ],
             view: this.view,
@@ -86,9 +87,18 @@ class OLMapWrapper {
             source: new ol.source.Vector({
                 projection: 'EPSG:3857'
             }),
-            zIndex: 1,
+            zIndex: 2,
             style: this.assetStyle
         });
+        this.wmsLayer1 = new ol.layer.Image({
+            source: new ol.source.ImageWMS({
+                url: 'http://142.93.96.220/cgi-bin/qgis_mapserv.fcgi',
+                params: {'LAYERS': ['countries', 'places']},
+                serverType: 'qgis',
+                projection: 'EPSG:3857',
+            }),
+            zIndex: 1,
+        })
     }
 
     updateLayerFromGeoJson(geojson, replace=true) {
