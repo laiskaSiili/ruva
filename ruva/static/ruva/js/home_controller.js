@@ -13,12 +13,6 @@ $(document).ready(function() {
     dataManager.addDataGetter('getTableData', getTableData); // defined in misc.js
     dataManager.addDataGetter('getMapData', getMapData); // defined in misc.js
     dataManager.addDataSetter('setDataFromFileUpload', setDataFromFileUpload); // defined in misc.js
-    // Set endpoint for initial data sourcing via ajax
-    dataManager.updateAjaxParams({
-        'url': tableDataApiEndpoint, // global variable defined in html script tag
-        'success': initTableAndMapData
-    });
-    dataManager.updateDataFromRemote();
 
     /* -------
     Init map
