@@ -38,26 +38,31 @@
 
 
 {% block content %}
-<!-- Layerswitch -->
-{% include 'ruva/includes/layerswitcher.html' %}
 <!-- Map popup -->
 {#{% include 'ruva/includes/popup.html' %}#}
 <!-- Import Dialog Modal -->
 {% include 'ruva/includes/upload_modal.html' with modal_id='import-modal' %}
 
-<div id="map-container">
-    <div id="map" class="map"></div>
+
+<div class="container-fluid">
+    <div class="mt-2 row">
+        <div class="col-2">
+            <!-- Layerswitch -->
+            {% include 'ruva/includes/layerswitcher.html' %}
+            <br>
+            <hr>
+            <!-- Fileupload -->
+            {% include 'ruva/includes/fileupload.html' %}
+        </div>
+        <div class="col-6">
+            <div id="map-container">
+                <div id="map" class="map"></div>
+            </div>
+        </div>
+        <div class="col-4">
+            <table id="table" class="w-100 hover"></table>
+        </div>
+    </div>
 </div>
-
-
-<div class="file-upload-container d-flex justify-content-center align-items-center">
-    <label for="file-input" class="d-flex justify-content-center align-items-center">
-        <i class="material-icons">file_upload</i> Drop xlsx here or click to upload
-    </label>
-    <input type="file" id="file-input" onclick="this.value=null;"/>
-</div>
-
-<br>
-<table id="table" class="w-100 hover"></table>
 
 {% endblock %}
