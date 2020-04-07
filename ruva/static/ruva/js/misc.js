@@ -57,15 +57,15 @@ function cleanStrings(columnArray) {
     var v;
     for (var i=0; i<columnArray.length; i++) {
         v = columnArray[i];
-        if (v === undefined || v === '') {
-            throw `Empty value found around row ${i+2}!` // i is 0-based and starts after header
-        }
         try {
-            v = v.toString();
-            cleanedColumnArray.push(v.trim());
+            v = v.toString().trim();
         } catch (err) {
             throw `Value around row ${i+2} cannot be converted to text: ${columnArray[i]}`;
         }
+        if (v === '') {
+            throw `Empty value found around row ${i+2}!` // i is 0-based and starts after header
+        }
+        cleanedColumnArray.push(v);
     }
     return cleanedColumnArray;
 }
