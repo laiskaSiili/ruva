@@ -174,3 +174,29 @@ class FileUploader {
     }
 
 }
+
+/*
+Example excel download
+*/
+$('.download-example-excel').on('click', function() {
+    var wb = XLSX.utils.book_new();
+    var citiesExampleData = [
+        {'Name': 'London', 'Lat': 51.509865, 'Lon': -0.118092, 'Cvar': 43},
+        {'Name': 'Berlin', 'Lat': 52.520008, 'Lon': 13.404954, 'Cvar': 190},
+        {'Name': 'Budapest', 'Lat': 47.497913, 'Lon': 19.040236, 'Cvar': -104},
+        {'Name': 'Bern', 'Lat': 46.948, 'Lon': 7.4474, 'Cvar': 7},
+        {'Name': 'Moskau', 'Lat': 55.751244, 'Lon': 37.618423, 'Cvar': -67},
+    ];
+    var ws1 = XLSX.utils.json_to_sheet(citiesExampleData);
+    XLSX.utils.book_append_sheet(wb, ws1, "cities");
+    var flawedExampleData = [
+        {'Name': 'London', 'Lat': -151.509865, 'Lon': -0.118092, 'Cvar': 43},
+        {'Name': 'Berlin', 'Lat': 52.520008, 'Lon': 13.404954, 'Cvar': 190},
+        {'Name': ' ', 'Lat': 47.497913, 'Lon': 19.040236, 'Cvar': -104},
+        {'Name': 'Bern', 'Lat': 46.948, 'Lon': 187.4474, 'Cvar': 7},
+        {'Name': 'Moskau', 'Lat': 55.751244, 'Lon': 37.618423, 'Cvar': 'Mos'},
+    ];
+    var ws2 = XLSX.utils.json_to_sheet(flawedExampleData);
+    XLSX.utils.book_append_sheet(wb, ws2, "cities_flawed");
+    XLSX.writeFile(wb, "example.xlsx");
+});
